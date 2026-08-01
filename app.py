@@ -15,10 +15,22 @@ app.secret_key = "wepower_secure_secret_key_change_this"
 
 # --- FIREBASE FIRESTORE INITIALIZATION ---
 # Ensure you have placed your 'firebase_credentials.json' file in your project root directory
-cred = credentials.Certificate("firebase_credentials.json")
+import os
+import json
+
+# Attempt to read credentials from Render's environment variable
+firebase_json_str = os.environ.get('FIREBASE_CREDENTIALS')
+
+if firebase_json_str:
+    # Running on Render: Convert the JSON string back to a dictionary
+    cred_dict = json.loads(firebase_json_str)
+    cred = credentials.Certificate(cred_dict)
+else:
+    # Running locally on your computer: Load the file directly
+    cred = credentials.Certificate("firebase_credentials.json")
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
-
 def validate_password(password):
     if len(password) < 8:
         return "Password must be at least 8 characters long."
